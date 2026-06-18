@@ -1,35 +1,70 @@
 from fastapi import APIRouter, Depends
-from app.core.dependencies import RoleChecker, get_current_active_user
-from app.db.models.user import User, UserRole
-from app.schemas.response import APIResponse
-from app.schemas.user import UserResponse
+from fastapi import Query, status
+from schemas.response import APIResponse
+from schemas.user import UserResponse, HealthRecordCreate, HealthRecordResponse
+from services.user import user_service
+from schemas.user import UserCreate
+from sqlalchemy.ext.asyncio import AsyncSession
+from core.dependencies import get_db
+from services.vector_memory import search_memory
+
 
 router = APIRouter()
 
 
-@router.get("/me", response_model=APIResponse[UserResponse])
-async def read_user_me(
-    current_user: User = Depends(get_current_active_user),
+@router.post("/create-user", response_model=APIResponse[UserResponse], status_code=status.HTTP_201_CREATED)
+async def create_user(
+    user_in: UserCreate, db: AsyncSession = Depends(get_db)
 ) -> APIResponse[UserResponse]:
     """
-    Retrieve the current logged-in user profile.
+    Create a new user.
     """
+    print("Creating user...")
+    print(user_in)
+    user = await user_service.create(db, obj_in=user_in)
     return APIResponse(
         success=True,
-        message="User profile retrieved successfully",
-        data=UserResponse.from_orm(current_user),
+        message="User successfully created",
+        data=None,
+    )
+
+@router.post("/create-health-record", response_model=APIResponse[HealthRecordResponse], status_code=status.HTTP_201_CREATED)
+async def create_health_record(
+    health_record_in: HealthRecordCreate, db: AsyncSession = Depends(get_db)
+) -> APIResponse[HealthRecordResponse]:
+    """
+    Create a new health record.
+    """
+    print("Creating health record...")
+    print(health_record_in)
+    health_record = await user_service.create_health_record(db, obj_in=health_record_in)
+    return APIResponse(
+        success=True,
+        message="Health record successfully created",
+        data=HealthRecordResponse.from_orm(health_record),
     )
 
 
-@router.get("/admin-only", response_model=APIResponse[UserResponse])
-async def read_admin_only(
-    current_user: User = Depends(RoleChecker([UserRole.ADMIN])),
-) -> APIResponse[UserResponse]:
-    """
-    Sample admin-only endpoint to verify Role-Based Access Control (RBAC).
-    """
+# router = APIRouter()
+
+
+@router.get(
+    "/search",
+    response_model=APIResponse,
+    status_code=status.HTTP_200_OK
+)
+async def search_health_memory(
+    user_id: str,
+    query: str = Query(..., min_length=3)
+):
+
+    results = await search_memory(
+        user_id=user_id,
+        query=query
+    )
+
     return APIResponse(
         success=True,
-        message="Admin access verified successfully",
-        data=UserResponse.from_orm(current_user),
+        message="Memory search completed",
+        data=results
     )

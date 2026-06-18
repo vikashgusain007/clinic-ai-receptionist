@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 import uuid
 from pydantic import BaseModel, EmailStr, Field
-from app.db.models.user import UserRole
+from db.models.user import UserRole
 
 
 class UserBase(BaseModel):
@@ -33,3 +33,23 @@ class UserResponse(BaseModel):
     class Config:
         from_attributes = True
         json_encoders = {uuid.UUID: str}
+
+class HealthRecordCreate(BaseModel):
+    user_id: uuid.UUID
+    type: str
+    title: str
+    description: str
+
+class HealthRecordResponse(BaseModel):
+    id: uuid.UUID
+    user_id: uuid.UUID
+    type: str
+    title: str
+    description: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+        json_encoders = {uuid.UUID: str}
+

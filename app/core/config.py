@@ -72,5 +72,9 @@ class Settings(BaseSettings):
     OTEL_EXPORTER_OTLP_ENDPOINT: str = "http://localhost:4317"
     PROMETHEUS_METRICS_PATH: str = "/metrics"
 
+    # Qdrant Configuration
+    QDRANT_HOST: str = "localhost"
+    QDRANT_PORT: int = 6333
+
 
 settings = Settings()

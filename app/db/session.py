@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from app.core.config import settings
+from core.config import settings
 
 # Create standard async engine with connection pooling parameters optimized for production.
 # pool_pre_ping checks connection health on checkout.

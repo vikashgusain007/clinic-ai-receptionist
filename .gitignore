@@ -19,3 +19,5 @@ env/
 .coverage.*.*.*
 .coverage.*.*.*.*
 .coverage.*.*.*.*.*
+alembic
+alembic.ini

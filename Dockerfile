@@ -12,11 +12,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Install virtualenv and build dependencies
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
+ENV HF_HOME=/tmp/huggingface
+ENV TRANSFORMERS_CACHE=/tmp/huggingface
+ENV SENTENCE_TRANSFORMERS_HOME=/tmp/huggingface
 
+RUN mkdir -p /tmp/huggingface && \
+    chmod -R 777 /tmp/huggingface
 COPY requirements.txt .
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt
 
+COPY . .
 
 # ================= RUNTIME STAGE =================
 FROM python:3.12-slim AS runtime

@@ -2,16 +2,16 @@ from typing import Optional
 from fastapi import HTTPException, status
 import jwt
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.core.security import (
+from core.security import (
     create_access_token,
     create_refresh_token,
     decode_token,
     verify_password,
 )
-from app.db.models.user import User
-from app.schemas.token import Token
-from app.schemas.user import UserCreate
-from app.services.user import user_service
+from db.models.user import User
+from schemas.token import Token
+from schemas.user import UserCreate
+from services.user import user_service
 
 
 class AuthService:

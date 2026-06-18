@@ -1,6 +1,6 @@
 import time
 from loguru import logger
-from app.tasks.celery_app import celery_app
+from tasks.celery_app import celery_app
 
 
 @celery_app.task(name="send_email_task")

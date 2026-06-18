@@ -1,7 +1,12 @@
+
 import enum
-from sqlalchemy import Boolean, Enum, String
+import uuid
+from datetime import datetime
+from sqlalchemy import Boolean, Enum, String, DateTime
 from sqlalchemy.orm import Mapped, mapped_column
-from app.db.base import Base
+from db.base import Base
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import func
 
 
 class UserRole(str, enum.Enum):
@@ -26,3 +31,11 @@ class User(Base):
         default=UserRole.USER,
         nullable=False,
     )
+
+
+class HealthRecord(Base):
+    __tablename__ = "healthrecords"
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    type: Mapped[str] = mapped_column(String(255), nullable=False)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str] = mapped_column(String(255), nullable=False)

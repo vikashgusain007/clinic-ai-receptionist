@@ -1,5 +1,5 @@
 from celery import Celery
-from app.core.config import settings
+from core.config import settings
 
 # Initialize Celery app with Redis broker and backend
 celery_app = Celery(

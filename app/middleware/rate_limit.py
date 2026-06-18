@@ -2,7 +2,7 @@ import time
 from fastapi import Request, Response, status
 from redis.asyncio import Redis
 from starlette.middleware.base import BaseHTTPMiddleware
-from app.core.config import settings
+from core.config import settings
 from loguru import logger
 
 
