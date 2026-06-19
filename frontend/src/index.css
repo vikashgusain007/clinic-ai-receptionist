@@ -1,0 +1,148 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: hsl(210 40% 98%);
+  --color-foreground: hsl(222 47% 11%);
+  --color-card: hsl(0 0% 100%);
+  --color-card-foreground: hsl(222 47% 11%);
+  --color-primary: hsl(210 100% 45%);
+  --color-primary-foreground: hsl(0 0% 100%);
+  --color-secondary: hsl(210 40% 96%);
+  --color-secondary-foreground: hsl(222 47% 11%);
+  --color-muted: hsl(210 40% 96%);
+  --color-muted-foreground: hsl(215 16% 47%);
+  --color-accent: hsl(210 100% 97%);
+  --color-accent-foreground: hsl(210 100% 35%);
+  --color-border: hsl(214 32% 91%);
+  --color-input: hsl(214 32% 91%);
+  --color-ring: hsl(210 100% 45%);
+  --color-destructive: hsl(0 84% 60%);
+  --color-destructive-foreground: hsl(0 0% 100%);
+  --color-sidebar: hsl(210 40% 97%);
+  --color-sidebar-foreground: hsl(222 47% 11%);
+  --color-health-blue: hsl(210 100% 45%);
+  --color-health-blue-light: hsl(210 100% 97%);
+  --color-health-green: hsl(152 69% 40%);
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+.dark {
+  --color-background: hsl(0 0% 6%);
+  --color-foreground: hsl(0 0% 96%);
+  --color-card: hsl(0 0% 9%);
+  --color-card-foreground: hsl(0 0% 96%);
+  --color-primary: hsl(0 0% 96%);
+  --color-primary-foreground: hsl(0 0% 9%);
+  --color-secondary: hsl(0 0% 14%);
+  --color-secondary-foreground: hsl(0 0% 96%);
+  --color-muted: hsl(0 0% 14%);
+  --color-muted-foreground: hsl(0 0% 58%);
+  --color-accent: hsl(0 0% 16%);
+  --color-accent-foreground: hsl(0 0% 96%);
+  --color-border: hsl(0 0% 18%);
+  --color-input: hsl(0 0% 18%);
+  --color-ring: hsl(0 0% 70%);
+  --color-destructive: hsl(0 62% 50%);
+  --color-destructive-foreground: hsl(0 0% 96%);
+  --color-sidebar: hsl(0 0% 4%);
+  --color-sidebar-foreground: hsl(0 0% 96%);
+  --color-health-blue: hsl(0 0% 90%);
+  --color-health-blue-light: hsl(0 0% 14%);
+  --color-health-green: hsl(0 0% 72%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html,
+  body,
+  #root {
+    @apply h-full;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-dot {
+  0%,
+  80%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.35s ease-out forwards;
+}
+
+.animate-pulse-dot {
+  animation: pulse-dot 1.4s infinite ease-in-out both;
+}
+
+.animate-pulse-dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.animate-pulse-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.animate-pulse-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    hsl(210 40% 96%) 25%,
+    hsl(210 40% 92%) 50%,
+    hsl(210 40% 96%) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.dark .skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    hsl(0 0% 14%) 25%,
+    hsl(0 0% 18%) 50%,
+    hsl(0 0% 14%) 75%
+  );
+  background-size: 200% 100%;
+}

@@ -1,17 +1,14 @@
 import json
+from typing import List, Dict, Any, Optional
+
 import ollama
 
-async def extract_memory(
-    user_id,
-    message
-):
 
-    prompt = f"""
+MEMORY_EXTRACTION_PROMPT = """
 You are a healthcare memory extraction AI.
 
-Your job is to analyze the user's message and decide what information should be stored.
-
-Classify the information into one or more categories.
+Your task:
+Analyze the user's message and decide what information should be stored.
 
 Categories:
 
@@ -57,8 +54,24 @@ Examples:
 Store:
 - Memory only
 
+5. HEALTH_QUERY
 
-5. NO_MEMORY
+User is asking about existing health information.
+
+Examples:
+
+- Do I have history of fever?
+- What health issues do I have?
+- Did I ever have dengue?
+- When was my last blood test?
+
+Store:
+- Nothing
+
+store_memory = false
+store_health_record = false
+
+6. NO_MEMORY
 
 Examples:
 - Hello
@@ -67,16 +80,15 @@ Examples:
 
 
 Rules:
-
 - Do not store temporary conversations.
-- Do not create medical facts that the user did not provide.
-- If uncertain, set confidence lower.
-IMPORTANT:
-- Output ONLY valid JSON.
-- Do not add explanations.
-- Do not use markdown.
-- Do not wrap JSON in ``` blocks.
+- Do not create medical facts.
+- Only extract information provided by the user.
+- If uncertain, reduce confidence.
 
+IMPORTANT:
+- Return ONLY valid JSON.
+- No markdown.
+- No explanations.
 
 
 User message:
@@ -84,152 +96,226 @@ User message:
 {message}
 
 
-Return format:
+JSON FORMAT:
 
 {{
-    "category":"",
-    "confidence":0.0,
+    "category": "",
+    "confidence": 0.0,
 
-    "store_memory":true,
+    "store_memory": false,
 
-    "memory_type":
-        "episodic|semantic|preference|null",
+    "memory_type": "episodic|semantic|preference|null",
 
-    "memory_content":"",
+    "memory_content": "",
 
-    "store_health_record":true,
+    "store_health_record": false,
 
     "health_record": {{
-        "type":"",
-        "title":"",
-        "description":"",
-        "event_date":""
+        "type": "",
+        "title": "",
+        "description": "",
+        "event_date": ""
     }}
 }}
 """
 
-    result = await generate_response(
-        {
-            "user_message": prompt,
-            "memories": [],
-            "health_records": []
-        }
-    )
 
-    return json.loads(result)
+HEALTH_ASSISTANT_PROMPT = """
+You are a personal healthcare assistant.
 
-async def generate_response(context):
+Answer the user's question using ONLY the provided information.
+
+USER QUESTION:
+{user_message}
 
 
-    prompt = f"""
-
-    You are a personal healthcare assistant.
-
-    Your job is to answer based on the user's stored information.
+KNOWN HEALTH RECORDS:
+{health_records}
 
 
-    USER QUESTION:
-
-    {context["user_message"]}
-
+RELEVANT MEMORIES:
+{memories}
 
 
-    KNOWN HEALTH RECORDS:
+RULES:
 
-    {context["health_records"]}
-
-
-
-    RELEVANT MEMORIES:
-
-    {context["memories"]}
-
-
-
-    RULES:
-
-    1. Only use information provided above.
-    2. Never create medical history.
-    3. Never assume two events are related.
-    4. If information is missing, say you don't know.
-    5. Clearly separate:
-    - Previous health information
-    - Current guidance
-    - Questions for user
+1. Never create medical history.
+2. Never assume relationships between events.
+3. If information is missing, say you don't know.
+4. Clearly separate:
+   - Previous health information
+   - Current guidance
+   - Questions for the user
 
 
-    Answer the user.
+Answer:
+"""
 
 
+async def extract_memory(
+    user_id: str,
+    message: str
+) -> Dict[str, Any]:
+    """
+    Extract memory and health events from user message.
     """
 
+    prompt = MEMORY_EXTRACTION_PROMPT.format(
+        message=message
+    )
+
+    response = await call_llm(
+        prompt,
+        json_mode=True
+    )
+
+    return parse_json_response(response)
 
 
-    response = ollama.chat(
-        model="llama3.2",
-        messages=[
+
+async def answer_health_query(
+    context: Dict[str, Any]
+) -> str:
+    """
+    Generate healthcare assistant response.
+    """
+
+    prompt = HEALTH_ASSISTANT_PROMPT.format(
+        user_message=context["user_message"],
+        health_records=context["health_records"],
+        memories=context["memories"]
+    )
+
+    response = await call_llm(prompt)
+
+    return response
+
+
+async def call_llm(
+    prompt: str,
+    model: str = "llama3.2",
+    json_mode: bool = False
+) -> str:
+    """
+    Generic Ollama LLM caller.
+    """
+
+    payload = {
+        "model": model,
+        "messages": [
             {
                 "role": "user",
                 "content": prompt
             }
         ]
+    }
+
+
+    if json_mode:
+        payload["format"] = "json"
+
+
+    response = ollama.chat(
+        **payload
     )
 
 
     return response["message"]["content"]
 
 
-from typing import List, Dict
+def parse_json_response(
+    response: str
+) -> Dict[str, Any]:
+
+    response = response.strip()
+
+
+    # Remove markdown if model still returns it
+
+    if response.startswith("```json"):
+        response = response.replace(
+            "```json",
+            ""
+        )
+
+
+    if response.endswith("```"):
+        response = response[:-3]
+
+
+    response = response.strip()
+
+
+    try:
+
+        return json.loads(response)
+
+
+    except Exception as e:
+
+        print("JSON PARSE FAILED")
+        print(response)
+        print(e)
+
+
+        return {
+            "category": "NO_MEMORY",
+            "confidence": 0,
+            "store_memory": False,
+            "memory_type": None,
+            "memory_content": "",
+            "store_health_record": False,
+            "health_record": {}
+        }
 
 
 def build_context(
     user_message: str,
-    health_records: List[Dict],
-    memories: List[Dict]
-):
+    health_records: List[Any],
+    memories: List[Dict[str, Any]]
+) -> Dict[str, Any]:
+    """
+    Prepare context for LLM.
+    """
 
-    context = {
-
+    return {
         "user_message": user_message,
 
+        "health_records": [
+            format_health_record(record)
+            for record in health_records
+        ],
 
-        "health_records": [],
-
-
-        "memories": [],
-
+        "memories": [
+            format_memory(memory)
+            for memory in memories
+        ]
     }
 
 
-    # Format health records
 
-    for record in health_records:
+def format_health_record(
+    record: Any
+) -> Dict[str, Any]:
 
-        context["health_records"].append(
-            {
-                "type": record.record_type,
-                "information": record.value,
-                "date": (
-                    record.memory_metadata.get("event_date")
-                    if record.memory_metadata
-                    else None
-                )
-            }
+    return {
+        "type": record.record_type,
+        "information": record.value,
+        "date": (
+            record.memory_metadata.get("event_date")
+            if record.memory_metadata
+            else None
         )
+    }
 
 
-    # Format memories
 
-    for memory in memories:
+def format_memory(
+    memory: Dict[str, Any]
+) -> Dict[str, Any]:
 
-        context["memories"].append(
-            {
-                "type": memory.get("memory_type"),
-                "information": memory.get("text"),
-                "score": memory.get("score")
-            }
-        )
-
-
-    return context
-
+    return {
+        "type": memory.get("memory_type"),
+        "information": memory.get("text"),
+        "score": memory.get("score")
+    }
