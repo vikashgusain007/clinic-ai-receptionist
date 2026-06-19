@@ -1,40 +1,9 @@
-from qdrant_client.models import PointStruct
-
-from vector.qdrant import qdrant_client
-
-
-COLLECTION_NAME = "health_memory"
-
-
-async def store_health_memory(
-    record_id: int,
-    user_id: int,
-    text: str,
-    vector: list
-):
-
-    qdrant_client.upsert(
-        collection_name=COLLECTION_NAME,
-        points=[
-            PointStruct(
-                id=record_id,
-                vector=vector,
-                payload={
-                    "user_id": user_id,
-                    "record_id": record_id,
-                    "source": "health_record",
-                    "text": text,
-                }
-            )
-        ]
-    )
-
-
 from services.embedding import generate_embedding
 from vector.qdrant import qdrant_client
 
-
-COLLECTION_NAME = "health_memory"
+from core.logging import info_logger
+import uuid
+COLLECTION_NAME = "health-memory"
 
 from qdrant_client.models import (
     Filter,
@@ -43,11 +12,14 @@ from qdrant_client.models import (
 )
 
 async def search_memory(
-    user_id: int,
+    user_id: uuid.UUID,
     query: str,
 ):
+    info_logger(f"Searching memory for user {user_id} with query {query}")
     vector = generate_embedding(query)
 
+    info_logger(f"Querying Qdrant for user {user_id} with query {query}")
+    user_id_str = str(user_id)
     results = qdrant_client.query_points(
         collection_name=COLLECTION_NAME,
         query=vector,
@@ -56,12 +28,13 @@ async def search_memory(
             must=[
                 FieldCondition(
                     key="user_id",
-                    match=MatchValue(value=user_id),
+                    match=MatchValue(value=user_id_str),
                 )
             ]
         ),
     )
 
+    info_logger(f"Found {len(results.points)} memories for user {user_id} with query {query}")
     memories = []
 
     for point in results.points:
@@ -73,4 +46,5 @@ async def search_memory(
             }
         )
 
+    info_logger(f"Returning {len(memories)} memories for user {user_id} with query {query}")
     return memories

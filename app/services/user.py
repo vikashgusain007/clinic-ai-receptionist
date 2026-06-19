@@ -3,9 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.security import get_password_hash
 from db.models.user import User
 from repositories.user import user_repository
-from schemas.user import UserCreate, UserUpdate, HealthRecordCreate
-from services.embedding import generate_embedding
-from services.vector_memory import store_health_memory
+from schemas.user import UserCreate, UserUpdate
 
 
 class UserService:

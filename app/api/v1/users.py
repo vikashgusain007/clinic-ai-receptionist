@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from fastapi import Query, status
 from schemas.response import APIResponse
-from schemas.user import UserResponse, HealthRecordCreate, HealthRecordResponse
+from schemas.user import UserResponse
 from services.user import user_service
 from schemas.user import UserCreate
 from sqlalchemy.ext.asyncio import AsyncSession

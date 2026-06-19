@@ -1,26 +1,24 @@
 from contextlib import asynccontextmanager
-from fastapi import Depends, FastAPI, Request, status
-from fastapi.exceptions import RequestValidationError
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-from prometheus_fastapi_instrumentator import Instrumentator
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from api.router import api_router
 from core.config import settings
 from core.dependencies import get_db
-from core.logging import setup_logging
-from middleware.rate_limit import RateLimitMiddleware
-from middleware.request_log import RequestLogMiddleware
-from middleware.security import SecurityHeadersMiddleware
-from loguru import logger
 
+import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+
+logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
     FastAPI Lifespan handler checking connection to resources.
     """
-    setup_logging()
     logger.info("Initializing application startup sequence...")
 
     # Pre-ping db connection to verify setup

@@ -7,7 +7,7 @@ qdrant_client = QdrantClient(
     port=settings.QDRANT_PORT
 )
 
-collection_name = "health_memory"
+collection_name = "health-memory"
 
 collections = qdrant_client.get_collections()
 

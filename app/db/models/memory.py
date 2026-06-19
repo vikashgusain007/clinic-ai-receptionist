@@ -16,12 +16,6 @@ from db.base import Base
 class Memory(Base):
     __tablename__ = "memories"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
-    )
-
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         nullable=False,
@@ -44,7 +38,7 @@ class Memory(Base):
         nullable=False,
     )
 
-    metadata: Mapped[dict | None] = mapped_column(
+    memory_metadata: Mapped[dict | None] = mapped_column(
         JSONB,
         nullable=True,
     )

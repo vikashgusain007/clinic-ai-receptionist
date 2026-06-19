@@ -34,22 +34,3 @@ class UserResponse(BaseModel):
         from_attributes = True
         json_encoders = {uuid.UUID: str}
 
-class HealthRecordCreate(BaseModel):
-    user_id: uuid.UUID
-    type: str
-    title: str
-    description: str
-
-class HealthRecordResponse(BaseModel):
-    id: uuid.UUID
-    user_id: uuid.UUID
-    type: str
-    title: str
-    description: str
-    created_at: datetime
-    updated_at: datetime
-
-    class Config:
-        from_attributes = True
-        json_encoders = {uuid.UUID: str}
-
