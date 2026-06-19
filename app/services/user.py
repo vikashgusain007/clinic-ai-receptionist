@@ -1,7 +1,7 @@
 from typing import Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from core.security import get_password_hash
-from db.models.user import User, HealthRecord
+from db.models.user import User
 from repositories.user import user_repository
 from schemas.user import UserCreate, UserUpdate, HealthRecordCreate
 from services.embedding import generate_embedding
@@ -50,44 +50,44 @@ class UserService:
             del update_data["password"]
         return await user_repository.update(db, db_obj=db_obj, obj_in=update_data)
 
-    async def create_health_record(self, db: AsyncSession, *, obj_in: HealthRecordCreate) -> HealthRecord:
-        """
-        Create a new health record.
-        """
-        db_obj = HealthRecord(
-            user_id=obj_in.user_id,
-            type=obj_in.type,
-            title=obj_in.title,
-            description=obj_in.description,
-        )
-        db.add(db_obj)
-        await db.commit()
-        await db.refresh(db_obj)
+    # async def create_health_record(self, db: AsyncSession, *, obj_in: HealthRecordCreate) -> HealthRecord:
+    #     """
+    #     Create a new health record.
+    #     """
+    #     db_obj = HealthRecord(
+    #         user_id=obj_in.user_id,
+    #         type=obj_in.type,
+    #         title=obj_in.title,
+    #         description=obj_in.description,
+    #     )
+    #     db.add(db_obj)
+    #     await db.commit()
+    #     await db.refresh(db_obj)
 
-        text = f"""
-        Health Record Type:
-        {db_obj.type}
+    #     text = f"""
+    #     Health Record Type:
+    #     {db_obj.type}
 
-        Title:
-        {db_obj.title}
+    #     Title:
+    #     {db_obj.title}
 
-        Description:
-        {db_obj.description}
-        """
+    #     Description:
+    #     {db_obj.description}
+    #     """
 
 
-        vector = generate_embedding(text)
-        print("embedding generated")
-        print(vector)
-        print("storing health memory")
-        await store_health_memory(
-            record_id=db_obj.id,
-            user_id=db_obj.user_id.hex,
-            text=text,
-            vector=vector
-        )
-        print("health memory stored")
-        return db_obj
+    #     vector = generate_embedding(text)
+    #     print("embedding generated")
+    #     print(vector)
+    #     print("storing health memory")
+    #     await store_health_memory(
+    #         record_id=db_obj.id,
+    #         user_id=db_obj.user_id.hex,
+    #         text=text,
+    #         vector=vector
+    #     )
+    #     print("health memory stored")
+    #     return db_obj
 
 
 user_service = UserService()

@@ -28,43 +28,43 @@ async def create_user(
         data=None,
     )
 
-@router.post("/create-health-record", response_model=APIResponse[HealthRecordResponse], status_code=status.HTTP_201_CREATED)
-async def create_health_record(
-    health_record_in: HealthRecordCreate, db: AsyncSession = Depends(get_db)
-) -> APIResponse[HealthRecordResponse]:
-    """
-    Create a new health record.
-    """
-    print("Creating health record...")
-    print(health_record_in)
-    health_record = await user_service.create_health_record(db, obj_in=health_record_in)
-    return APIResponse(
-        success=True,
-        message="Health record successfully created",
-        data=HealthRecordResponse.from_orm(health_record),
-    )
+# @router.post("/create-health-record", response_model=APIResponse[HealthRecordResponse], status_code=status.HTTP_201_CREATED)
+# async def create_health_record(
+#     health_record_in: HealthRecordCreate, db: AsyncSession = Depends(get_db)
+# ) -> APIResponse[HealthRecordResponse]:
+#     """
+#     Create a new health record.
+#     """
+#     print("Creating health record...")
+#     print(health_record_in)
+#     health_record = await user_service.create_health_record(db, obj_in=health_record_in)
+#     return APIResponse(
+#         success=True,
+#         message="Health record successfully created",
+#         data=HealthRecordResponse.from_orm(health_record),
+#     )
 
 
-# router = APIRouter()
+# # router = APIRouter()
 
 
-@router.get(
-    "/search",
-    response_model=APIResponse,
-    status_code=status.HTTP_200_OK
-)
-async def search_health_memory(
-    user_id: str,
-    query: str = Query(..., min_length=3)
-):
+# @router.get(
+#     "/search",
+#     response_model=APIResponse,
+#     status_code=status.HTTP_200_OK
+# )
+# async def search_health_memory(
+#     user_id: str,
+#     query: str = Query(..., min_length=3)
+# ):
 
-    results = await search_memory(
-        user_id=user_id,
-        query=query
-    )
+#     results = await search_memory(
+#         user_id=user_id,
+#         query=query
+#     )
 
-    return APIResponse(
-        success=True,
-        message="Memory search completed",
-        data=results
-    )
+#     return APIResponse(
+#         success=True,
+#         message="Memory search completed",
+#         data=results
+#     )
